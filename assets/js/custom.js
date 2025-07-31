@@ -101,16 +101,19 @@ function addSecurityProtection() {
         }
     });
 
-    // Disable developer tools
+    // Disable developer tools (Desktop only)
     let devtools = {open: false, orientation: null};
     setInterval(() => {
-        const threshold = 160;
-        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-        if (widthThreshold || heightThreshold) {
-            if (!devtools.open) {
-                devtools.open = true;
-                document.body.innerHTML = '<div style="text-align:center;padding:50px;color:red;font-size:24px;">Developer tools detected. Access denied.</div>';
+        // Only check on desktop devices (screen width > 768px)
+        if (window.innerWidth > 768) {
+            const threshold = 160;
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            if (widthThreshold || heightThreshold) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    document.body.innerHTML = '<div style="text-align:center;padding:50px;color:red;font-size:24px;">Developer tools detected. Access denied.</div>';
+                }
             }
         }
     }, 1000);
