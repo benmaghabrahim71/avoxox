@@ -39,8 +39,134 @@
 </head>
 <body>
 	
+<!-- Notification Bar with News Animation -->
+<style>
+@keyframes scroll-left {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-3px);
+    }
+    60% {
+        transform: translateY(-2px);
+    }
+}
+
+.notification-bar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 12px 0;
+    font-weight: 600;
+    font-size: 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1060;
+    overflow: hidden;
+}
+
+.news-ticker {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll-left 20s linear infinite;
+}
+
+.news-ticker:hover {
+    animation-play-state: paused;
+}
+
+.coupon-code {
+    color: #ffd700;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    animation: pulse-glow 2s ease-in-out infinite;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.gift-icon {
+    color: #ffd700;
+    animation: bounce 2s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+.dismiss-btn {
+    border: 1px solid white;
+    color: white;
+    background: transparent;
+    padding: 4px 12px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.dismiss-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.news-container {
+    position: relative;
+    overflow: hidden;
+    height: 24px;
+}
+
+.news-content {
+    position: absolute;
+    white-space: nowrap;
+    animation: scroll-left 25s linear infinite;
+}
+
+.news-content:hover {
+    animation-play-state: paused;
+}
+</style>
+
+<div class="notification-bar">
+	<div class="container-fluid container-custom">
+		<div class="row align-items-center">
+			<div class="col-md-8">
+				<div class="news-container">
+					<div class="news-content" id="announcementContent">
+						<i class="fas fa-gift gift-icon"></i>
+						<span>🎉 SPECIAL OFFER: Use coupon code <span class="coupon-code">Avox-Back</span> for <strong>-50%</strong> discount on SAMP and MTA services! 🎉</span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4 text-end">
+				<button class="btn btn-sm dismiss-btn" onclick="this.parentElement.parentElement.parentElement.parentElement.style.display='none'">
+					<i class="fas fa-times me-1"></i>Dismiss
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 <!-- Navbar -->
-<nav id="navbar_top" class="navbar navbar-dark navbar-expand-lg fixed-top">
+<nav id="navbar_top" class="navbar navbar-dark navbar-expand-lg fixed-top" style="top: 60px;">
 	<div class="container-fluid container-custom">
 		<a class="navbar-brand d-flex align-items-center" href="index.html">
 			<img class="img-fluid me-2" src="assets/images/logo.png" alt="Avox Hosting Logo" style="height:40px;">
@@ -508,5 +634,87 @@
 				</div>
 			</div>
 		</noscript>
+
+		<!-- Announcement System -->
+		<script>
+			// Announcement System
+			function loadAnnouncement() {
+				const savedAnnouncement = localStorage.getItem('currentAnnouncement');
+				if (savedAnnouncement) {
+					const announcement = JSON.parse(savedAnnouncement);
+					
+					// Only show if announcement is active
+					if (announcement.active) {
+						const contentDiv = document.getElementById('announcementContent');
+						const notificationBar = document.querySelector('.notification-bar');
+						
+						// Update content
+						contentDiv.innerHTML = `
+							<i class="${announcement.icon} gift-icon"></i>
+							<span>${announcement.text}</span>
+						`;
+						
+						// Update styling based on type
+						updateNotificationStyle(announcement);
+						
+						// Update animation speed
+						const newsContent = document.querySelector('.news-content');
+						if (newsContent) {
+							newsContent.style.animationDuration = `${announcement.speed}s`;
+						}
+					} else {
+						// Hide notification if inactive
+						const notificationBar = document.querySelector('.notification-bar');
+						if (notificationBar) {
+							notificationBar.style.display = 'none';
+						}
+					}
+				}
+			}
+
+			function updateNotificationStyle(announcement) {
+				const notificationBar = document.querySelector('.notification-bar');
+				const type = announcement.type;
+				const color = announcement.color;
+				
+				let gradient = '';
+				switch(type) {
+					case 'success':
+						gradient = `linear-gradient(135deg, #28a745 0%, #20c997 100%)`;
+						break;
+					case 'warning':
+						gradient = `linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)`;
+						break;
+					case 'danger':
+						gradient = `linear-gradient(135deg, #dc3545 0%, #e83e8c 100%)`;
+						break;
+					case 'promotion':
+						gradient = `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%)`;
+						break;
+					default:
+						gradient = `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`;
+				}
+				
+				if (notificationBar) {
+					notificationBar.style.background = gradient;
+				}
+			}
+
+			function adjustColor(color, amount) {
+				const hex = color.replace('#', '');
+				const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+				const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+				const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+				return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+			}
+
+			// Load announcement when page loads
+			document.addEventListener('DOMContentLoaded', function() {
+				loadAnnouncement();
+				
+				// Check for new announcements every 30 seconds
+				setInterval(loadAnnouncement, 30000);
+			});
+		</script>
 	</body>
 	</html>
