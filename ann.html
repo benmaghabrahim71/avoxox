@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Announcement Manager - Avox Hosting</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css" />
+    <link
+      href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@0ac23ca/css/all.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="icon" href="assets/images/logo.png" type="image/png" />
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .admin-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 50px auto;
+            max-width: 800px;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .announcement-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #dc3545;
+            color: white;
+        }
+
+        .icon-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .icon-option {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .icon-option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .icon-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #333;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img
+                  class="img-fluid me-2"
+                  src="assets/images/logo.png"
+                  alt="Avox Hosting Logo"
+                  style="height: 40px"
+                />
+                Avox <span style="color: #00aaff">Hosting</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-home me-1"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="admin-container">
+            <div class="header">
+                <h1>
+                    <i class="fas fa-bullhorn me-2"></i>Announcement Manager
+                </h1>
+                <p class="text-muted">Create and manage site-wide announcements</p>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+
+            <form id="announcementForm">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="announcementText" class="form-label">
+                                <i class="fas fa-edit me-1"></i>Announcement Text
+                            </label>
+                            <textarea
+                              class="form-control"
+                              id="announcementText"
+                              rows="3"
+                              placeholder="Enter your announcement message here..."
+                              required
+                            >Use coupon code Avox-Back for -50% discount on SAMP and MTA services!</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="announcementType" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Announcement Type
+                            </label>
+                            <select class="form-control" id="announcementType">
+                                <option value="info">Information</option>
+                                <option value="warning">Warning</option>
+                                <option value="success">Success</option>
+                                <option value="danger">Important</option>
+                                <option value="promotion" selected>Promotion</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-palette me-1"></i>Icon Selection
+                            </label>
+                            <div class="icon-selector">
+                                <div class="icon-option selected" data-icon="fas fa-gift">🎁</div>
+                                <div class="icon-option" data-icon="fas fa-fire">🔥</div>
+                                <div class="icon-option" data-icon="fas fa-star">⭐</div>
+                                <div class="icon-option" data-icon="fas fa-bell">🔔</div>
+                                <div class="icon-option" data-icon="fas fa-heart">❤️</div>
+                                <div class="icon-option" data-icon="fas fa-rocket">🚀</div>
+                                <div class="icon-option" data-icon="fas fa-trophy">🏆</div>
+                                <div class="icon-option" data-icon="fas fa-gem">💎</div>
+                                <div class="icon-option" data-icon="fas fa-bolt">⚡</div>
+                                <div class="icon-option" data-icon="fas fa-crown">👑</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-palette me-1"></i>Color Theme
+                            </label>
+                            <div class="color-picker">
+                                <div
+                                  class="color-option selected"
+                                  data-color="#667eea"
+                                  style="background: #667eea"
+                                ></div>
+                                <div
+                                  class="color-option"
+                                  data-color="#28a745"
+                                  style="background: #28a745"
+                                ></div>
+                                <div
+                                  class="color-option"
+                                  data-color="#dc3545"
+                                  style="background: #dc3545"
+                                ></div>
+                                <div
+                                  class="color-option"
+                                  data-color="#ffc107"
+                                  style="background: #ffc107"
+                                ></div>
+                                <div
+                                  class="color-option"
+                                  data-color="#17a2b8"
+                                  style="background: #17a2b8"
+                                ></div>
+                                <div
+                                  class="color-option"
+                                  data-color="#6f42c1"
+                                  style="background: #6f42c1"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-eye me-1"></i>Preview
+                            </label>
+                            <div id="announcementPreview" class="announcement-preview">
+                                <i class="fas fa-gift me-2"></i>
+                                <span
+                                  >Use coupon code
+                                  <strong style="color: #ffd700;">Avox-Back</strong> for
+                                  <strong>-50%</strong> discount on SAMP and MTA services!</span
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-toggle-on me-1"></i>Status
+                            </label>
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-active me-2">Active</span>
+                                <div class="form-check form-switch">
+                                    <input
+                                      class="form-check-input"
+                                      type="checkbox"
+                                      id="announcementActive"
+                                      checked
+                                    />
+                                    <label class="form-check-label" for="announcementActive">
+                                        Show Announcement
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="animationSpeed" class="form-label">
+                                <i class="fas fa-tachometer-alt me-1"></i>Animation Speed
+                            </label>
+                            <input
+                              type="range"
+                              class="form-range"
+                              id="animationSpeed"
+                              min="10"
+                              max="40"
+                              value="25"
+                            />
+                            <small class="text-muted"
+                              >Speed: <span id="speedValue">25</span>s</small
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save & Publish
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="previewBtn">
+                                <i class="fas fa-eye me-1"></i>Preview
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearBtn">
+                                <i class="fas fa-trash me-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script>
+        // DOM Elements
+        const form = document.getElementById("announcementForm");
+        const textArea = document.getElementById("announcementText");
+        const typeSelect = document.getElementById("announcementType");
+        const preview = document.getElementById("announcementPreview");
+        const activeToggle = document.getElementById("announcementActive");
+        const speedSlider = document.getElementById("animationSpeed");
+        const speedValue = document.getElementById("speedValue");
+        const iconOptions = document.querySelectorAll(".icon-option");
+        const colorOptions = document.querySelectorAll(".color-option");
+
+        // Current announcement data
+        let currentAnnouncement = {
+            text: "Use coupon code Avox-Back for -50% discount on SAMP and MTA services!",
+            type: "promotion",
+            icon: "fas fa-gift",
+            color: "#667eea",
+            active: true,
+            speed: 25,
+        };
+
+        // Initialize
+        function init() {
+            loadAnnouncement();
+            updatePreview();
+            setupEventListeners();
+            setupInvisibleLogin(); // Added here
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            form.addEventListener("submit", handleSubmit);
+            textArea.addEventListener("input", updatePreview);
+            typeSelect.addEventListener("change", updatePreview);
+            activeToggle.addEventListener("change", updatePreview);
+            speedSlider.addEventListener("input", updateSpeed);
+
+            iconOptions.forEach((option) => {
+                option.addEventListener("click", selectIcon);
+            });
+
+            colorOptions.forEach((option) => {
+                option.addEventListener("click", selectColor);
+            });
+
+            document.getElementById("previewBtn").addEventListener("click", previewAnnouncement);
+            document.getElementById("clearBtn").addEventListener("click", clearForm);
+        }
+
+        // Update preview
+        function updatePreview() {
+            const text = textArea.value;
+            const type = typeSelect.value;
+            const active = activeToggle.checked;
+
+            currentAnnouncement.text = text;
+            currentAnnouncement.type = type;
+            currentAnnouncement.active = active;
+
+            // Update preview content
+            preview.innerHTML = `
+                <i class="${currentAnnouncement.icon} me-2"></i>
+                <span>${text}</span>
+            `;
+
+            // Update preview styling based on type
+            updatePreviewStyle();
+        }
+
+        // Update preview styling
+        function updatePreviewStyle() {
+            const type = currentAnnouncement.type;
+            const color = currentAnnouncement.color;
+
+            let gradient = "";
+            switch (type) {
+                case "success":
+                    gradient = `linear-gradient(135deg, #28a745 0%, #20c997 100%)`;
+                    break;
+                case "warning":
+                    gradient = `linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)`;
+                    break;
+                case "danger":
+                    gradient = `linear-gradient(135deg, #dc3545 0%, #e83e8c 100%)`;
+                    break;
+                case "promotion":
+                    gradient = `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%)`;
+                    break;
+                default:
+                    gradient = `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`;
+            }
+
+            preview.style.background = gradient;
+        }
+
+        // Select icon
+        function selectIcon(e) {
+            iconOptions.forEach((opt) => opt.classList.remove("selected"));
+            e.target.classList.add("selected");
+            currentAnnouncement.icon = e.target.dataset.icon;
+            updatePreview();
+        }
+
+        // Select color
+        function selectColor(e) {
+            colorOptions.forEach((opt) => opt.classList.remove("selected"));
+            e.target.classList.add("selected");
+            currentAnnouncement.color = e.target.dataset.color;
+            updatePreview();
+        }
+
+        // Update speed
+        function updateSpeed() {
+            const speed = speedSlider.value;
+            speedValue.textContent = speed;
+            currentAnnouncement.speed = parseInt(speed);
+        }
+
+        // Handle form submission
+        function handleSubmit(e) {
+            e.preventDefault();
+
+            if (!textArea.value.trim()) {
+                showAlert("Please enter announcement text", "danger");
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem("currentAnnouncement", JSON.stringify(currentAnnouncement));
+
+            showAlert("Announcement saved successfully!", "success");
+
+            // Simulate sending to main page
+            setTimeout(() => {
+                showAlert("Announcement is now live on the main page!", "success");
+            }, 1000);
+        }
+
+        // Preview announcement
+        function previewAnnouncement() {
+            // Create a temporary notification bar for preview
+            const tempBar = document.createElement("div");
+            tempBar.className = "notification-bar";
+            tempBar.style.cssText = `
+                background: ${preview.style.background};
+                color: white;
+                text-align: center;
+                padding: 12px 0;
+                font-weight: 600;
+                font-size: 16px;
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                z-index: 1060;
+                animation: slideDown 0.5s ease-out;
+            `;
+
+            tempBar.innerHTML = `
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-12">
+                            <i class="${currentAnnouncement.icon} me-2"></i>
+                            <span>${currentAnnouncement.text}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(tempBar);
+
+            setTimeout(() => {
+                tempBar.remove();
+            }, 3000);
+        }
+
+        // Clear form
+        function clearForm() {
+            if (confirm("Are you sure you want to clear the form?")) {
+                textArea.value = "";
+                typeSelect.value = "info";
+                activeToggle.checked = true;
+                speedSlider.value = 25;
+                speedValue.textContent = "25";
+
+                // Reset selections
+                iconOptions.forEach((opt) => opt.classList.remove("selected"));
+                iconOptions[0].classList.add("selected");
+
+                colorOptions.forEach((opt) => opt.classList.remove("selected"));
+                colorOptions[0].classList.add("selected");
+
+                currentAnnouncement = {
+                    text: "",
+                    type: "info",
+                    icon: "fas fa-gift",
+                    color: "#667eea",
+                    active: true,
+                    speed: 25,
+                };
+
+                updatePreview();
+                showAlert("Form cleared", "info");
+            }
+        }
+
+        // Load saved announcement
+        function loadAnnouncement() {
+            const saved = localStorage.getItem("currentAnnouncement");
+            if (saved) {
+                currentAnnouncement = JSON.parse(saved);
+
+                textArea.value = currentAnnouncement.text;
+                typeSelect.value = currentAnnouncement.type;
+                activeToggle.checked = currentAnnouncement.active;
+                speedSlider.value = currentAnnouncement.speed;
+                speedValue.textContent = currentAnnouncement.speed;
+
+                // Set icon selection
+                iconOptions.forEach((opt) => {
+                    opt.classList.remove("selected");
+                    if (opt.dataset.icon === currentAnnouncement.icon) {
+                        opt.classList.add("selected");
+                    }
+                });
+
+                // Set color selection
+                colorOptions.forEach((opt) => {
+                    opt.classList.remove("selected");
+                    if (opt.dataset.color === currentAnnouncement.color) {
+                        opt.classList.add("selected");
+                    }
+                });
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById("alertContainer");
+            const alert = document.createElement("div");
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Utility function to adjust color brightness
+        function adjustColor(color, amount) {
+            const hex = color.replace("#", "");
+            const r = Math.max(
+                0,
+                Math.min(255, parseInt(hex.substr(0, 2), 16) + amount)
+            );
+            const g = Math.max(
+                0,
+                Math.min(255, parseInt(hex.substr(2, 2), 16) + amount)
+            );
+            const b = Math.max(
+                0,
+                Math.min(255, parseInt(hex.substr(4, 2), 16) + amount)
+            );
+            return `#${r.toString(16).padStart(2, "0")}${g
+                .toString(16)
+                .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+        }
+
+        // Add CSS for slideDown animation
+        const style = document.createElement("style");
+        style.textContent = `
+            @keyframes slideDown {
+                from { transform: translateY(-100%); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // -- INVISIBLE "avox1" LOGIN FEATURE --
+
+        function setupInvisibleLogin() {
+            let inputBuffer = "";
+
+            document.addEventListener("keydown", (e) => {
+                // Only letters and numbers, ignore others
+                if (e.key.length === 1) {
+                    inputBuffer += e.key.toLowerCase();
+
+                    // Keep buffer max length to 5 (length of "avox1")
+                    if (inputBuffer.length > 5) {
+                        inputBuffer = inputBuffer.slice(-5);
+                    }
+
+                    if (inputBuffer === "avox1") {
+                        alert("Login successful! Welcome admin.");
+                        inputBuffer = "";
+                        // Here you can add real login logic like redirect or unlock UI
+                    }
+                }
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>
