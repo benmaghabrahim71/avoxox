@@ -418,6 +418,39 @@
         padding-top: 60px !important;
     }
 }
+
+/* Scroll behavior improvements */
+html {
+    scroll-behavior: smooth;
+}
+
+.notification-bar {
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+#navbar_top {
+    transition: top 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+body {
+    transition: padding-top 0.3s ease-out;
+}
+
+/* Ensure proper stacking during scroll */
+.notification-bar,
+#navbar_top {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Prevent layout shift during scroll */
+.notification-bar {
+    transform: translateZ(0);
+}
+
+#navbar_top {
+    transform: translateZ(0);
+}
 </style>
 
 <div class="notification-bar">
@@ -432,7 +465,7 @@
 				</div>
 			</div>
 			<div class="col-md-4 text-end">
-				<button class="btn btn-sm dismiss-btn" onclick="this.parentElement.parentElement.parentElement.parentElement.style.display='none'">
+				<button class="btn btn-sm dismiss-btn" onclick="dismissNotification()">
 					<i class="fas fa-times me-1"></i>Dismiss
 				</button>
 			</div>
@@ -1219,12 +1252,138 @@
 				return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 			}
 
+			// Dismiss notification function
+			function dismissNotification() {
+				const notificationBar = document.querySelector('.notification-bar');
+				if (notificationBar) {
+					// Add smooth transition
+					notificationBar.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+					notificationBar.style.opacity = '0';
+					notificationBar.style.transform = 'translateY(-100%)';
+					
+					setTimeout(() => {
+						notificationBar.style.display = 'none';
+						
+						// Adjust navbar position
+						const navbar = document.getElementById('navbar_top');
+						if (navbar) {
+							navbar.style.top = '0px';
+							navbar.style.transition = 'top 0.3s ease-out';
+						}
+						
+						// Remove body padding
+						document.body.style.paddingTop = '0px';
+						document.body.style.transition = 'padding-top 0.3s ease-out';
+						
+						// Save dismissal state
+						localStorage.setItem('notificationDismissed', 'true');
+						
+						// Trigger scroll event to update positioning
+						window.dispatchEvent(new Event('scroll'));
+					}, 300);
+				}
+			}
+
+			// Check if notification was previously dismissed
+			function checkDismissalState() {
+				const dismissed = localStorage.getItem('notificationDismissed');
+				if (dismissed === 'true') {
+					const notificationBar = document.querySelector('.notification-bar');
+					if (notificationBar) {
+						notificationBar.style.display = 'none';
+					}
+					
+					// Adjust navbar position
+					const navbar = document.getElementById('navbar_top');
+					if (navbar) {
+						navbar.style.top = '0px';
+					}
+					
+					// Remove body padding
+					document.body.style.paddingTop = '0px';
+				}
+			}
+
 			// Load announcement when page loads
 			document.addEventListener('DOMContentLoaded', function() {
+				checkDismissalState();
 				loadAnnouncement();
 				
 				// Check for new announcements every 30 seconds
 				setInterval(loadAnnouncement, 30000);
+			});
+
+			// Reset dismissal when new announcement is created
+			function resetDismissal() {
+				localStorage.removeItem('notificationDismissed');
+			}
+
+			// Listen for storage changes (when new announcement is saved from admin panel)
+			window.addEventListener('storage', function(e) {
+				if (e.key === 'currentAnnouncement') {
+					// Reset dismissal state when new announcement is created
+					localStorage.removeItem('notificationDismissed');
+					// Reload announcement
+					loadAnnouncement();
+				}
+			});
+
+			// Handle scroll behavior
+			let lastScrollTop = 0;
+			const notificationBar = document.querySelector('.notification-bar');
+			const navbar = document.getElementById('navbar_top');
+
+			window.addEventListener('scroll', function() {
+				const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+				const isNotificationVisible = notificationBar && notificationBar.style.display !== 'none';
+				
+				// Determine navbar position based on notification visibility
+				if (navbar) {
+					if (isNotificationVisible) {
+						// When notification is visible, navbar should be below it
+						navbar.style.top = '60px';
+					} else {
+						// When notification is dismissed, navbar should be at top
+						navbar.style.top = '0px';
+					}
+				}
+
+				// Add scroll-based effects
+				if (scrollTop > lastScrollTop && scrollTop > 100) {
+					// Scrolling down - add subtle effects
+					if (notificationBar && isNotificationVisible) {
+						notificationBar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+					}
+					if (navbar) {
+						navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+					}
+				} else {
+					// Scrolling up or at top - remove effects
+					if (notificationBar && isNotificationVisible) {
+						notificationBar.style.boxShadow = 'none';
+					}
+					if (navbar) {
+						navbar.style.boxShadow = 'none';
+					}
+				}
+
+				lastScrollTop = scrollTop;
+			});
+
+			// Ensure proper positioning on page load
+			window.addEventListener('load', function() {
+				const dismissed = localStorage.getItem('notificationDismissed');
+				if (dismissed === 'true') {
+					if (navbar) {
+						navbar.style.top = '0px';
+					}
+					document.body.style.paddingTop = '0px';
+				} else {
+					if (navbar) {
+						navbar.style.top = '60px';
+					}
+					document.body.style.paddingTop = '60px';
+				}
 			});
 		</script>
 	</body>
